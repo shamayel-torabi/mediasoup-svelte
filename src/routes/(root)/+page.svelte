@@ -9,6 +9,9 @@
     const frmData = new FormData(event.currentTarget as HTMLFormElement);
     const roomName = frmData.get("room") as string;
     const userName = frmData.get("username") as string;
+    if(!roomName || !userName){
+      return;
+    }
     const { roomId } = await socket.emitWithAck("createRoom", roomName);
     goto(`/room?roomId=${roomId}&userName=${userName}`);
   }

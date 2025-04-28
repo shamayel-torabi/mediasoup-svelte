@@ -20,19 +20,26 @@
               id="email"
               name="email"
               dir="ltr"
+              value={form?.email ?? ""}
               placeholder="name@example.com"
             />
+            {#if form?.emailMissing}<p class="text-red-600">
+                رایانامه باید وارد شود
+              </p>
+            {/if}
           </div>
           <div class="mb-5">
             <label for="password" class="mb-2">گذرواژه</label>
             <input type="password" id="password" name="password" dir="ltr" />
+            {#if form?.passwordMissing}<p class="text-red-600">گذرواژه باید وارد شود</p>
+            {/if}
           </div>
           <div class=",b-5 flex justify-end">
             <button type="submit">ارسال</button>
           </div>
           <div class="mb-5">
-            {#if form?.error}
-              <p class="text-red-600">{form.error}</p>
+            {#if form?.incorrect}
+              <p class="text-red-600">رایانامه یا گذرواژه اشتباه است!</p>
             {/if}
           </div>
         </div>
