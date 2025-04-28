@@ -1,14 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { io } from "socket.io-client";
+  import { useSocket } from "$lib/useSocket";
 
-  const socket = io("/ws");
+  const socket = useSocket()
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     const frmData = new FormData(event.currentTarget as HTMLFormElement);
-    const roomName = frmData.get("room");
-    const userName = frmData.get("username");
+    const roomName = frmData.get("room") as string;
+    const userName = frmData.get("username") as string;
     const { roomId } = await socket.emitWithAck("createRoom", roomName);
     goto(`/room?roomId=${roomId}&userName=${userName}`);
   }
@@ -20,7 +20,7 @@
 </svelte:head>
 
 <section class="overflow-y-auto">
-  <article class="grid items-center justify-center h-(--page--height)">
+  <article class="grid items-center justify-center h-screen">
     <div class="card w-[24rem]">
       <h5 class="card-title">پیوستن به نشست</h5>
       <form onsubmit={handleSubmit} class="max-w-sm mx-auto">

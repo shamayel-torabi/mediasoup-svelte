@@ -3,7 +3,7 @@
 	<meta name="description" content="About this app" />
 </svelte:head>
 
-<section class="overflow-y-auto max-w-[1200px] m-auto">
+<section class="overflow-y-auto max-w-[1200px] m-auto mt-10">
 	<h1 class='text-2xl text-gray-950 dark:text-gray-50'>درباره</h1>
 
 	<p class='text-gray-950 dark:text-gray-50'>
