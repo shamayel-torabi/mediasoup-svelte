@@ -18,6 +18,16 @@ body {
   @apply bg-white dark:bg-gray-950;
 }
 
+button {
+  @apply py-1.5 px-4 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600;
+}
+button.enable {
+  @apply hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700;
+}
+button.disabled{
+  @apply cursor-not-allowed
+}
+
 label {
   @apply block mb-2 text-sm font-medium text-gray-900 dark:text-white;
 }

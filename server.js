@@ -1,6 +1,6 @@
 import express from "express";
 import { createServer } from "vite";
-import runMediaSoupServer from './server/mediaServer.js'
+import runMediaSoupServer from './src/lib/server/mediaServer.js'
 
 // Constants
 const isDevelopment = process.env.NODE_ENV === "development";
