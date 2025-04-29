@@ -1,5 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
+import { users } from "$lib/server/users";
 
 export const load: PageServerLoad = async ({ cookies }) => {
   const sessionid = cookies.get("sessionid");
@@ -29,8 +30,16 @@ export const actions = {
       return fail(400, { email, emailMissing, passwordMissing, incorrect });
     }
 
-    if (email === "shamayel.torabi@gmail.com" && password === "sham") {
-      cookies.set("sessionid", email, { path: "/" });
+    const user = users.find(u => u.email === email && u.password === password);
+
+    if (user) {
+      cookies.set("sessionid", email, {
+        httpOnly: true,
+        sameSite: 'strict',
+        secure: false,
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7
+      });
       throw redirect(301, "/");
     }
     

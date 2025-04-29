@@ -9,28 +9,21 @@
   });
 
   let roomNameError: Boolean;
-  let userNameError: Boolean;
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
     const frmData = new FormData(event.currentTarget as HTMLFormElement);
     const roomName = frmData.get("room") as string;
-    const userName = frmData.get("username") as string;
 
     roomNameError = false;
-    userNameError = false;
 
     if (!roomName) {
       roomNameError = true;
-    }
-    if (!userName) {
-      userNameError = true;
-    }
-    if (!roomName || !userName) {
       return;
     }
+
     const { roomId } = await socket.emitWithAck("createRoom", roomName);
-    goto(`/room?roomId=${roomId}&userName=${userName}`);
+    goto(`/room?roomId=${roomId}`);
   }
 </script>
 
@@ -51,19 +44,6 @@
           <Input type="text" id="room" name="room" placeholder="نام نشست" />
           {#if roomNameError}<p class="mt-3 text-red-600">
               نام نشست باید وارد شود
-            </p>
-          {/if}
-        </div>
-        <div>
-          <Label for="username">نام کاربر</Label>
-          <Input
-            type="text"
-            id="username"
-            name="username"
-            placeholder="نام کاربر"
-          />
-          {#if userNameError}<p class="mt-3 text-red-600">
-              نام کاربر باید وارد شود
             </p>
           {/if}
         </div>

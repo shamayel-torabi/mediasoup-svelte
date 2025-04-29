@@ -42,7 +42,7 @@
         {/if}
       </div>
       <div class="grid justify-end">
-        <Button type="submit">ارسال</Button>
+        <Button type="submit">ورود</Button>
       </div>
     </form>
   </Card>

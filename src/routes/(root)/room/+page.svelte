@@ -11,8 +11,11 @@
   import { Producer, Transport } from "mediasoup-client/types";
   import createProducerTransport from "$lib/mediaSoupFunctions/createProducerTransport";
   import createProducer from "$lib/mediaSoupFunctions/createProducer";
+  import { getContext } from "svelte";
 
   let { data }: PageProps = $props();
+  const user = getContext<() => { user: string }>("user");
+  const userName = user().user;
 
   let enableFeedBtn = $state(true);
   let muteBtn = $state(true);
@@ -78,7 +81,7 @@
 
   async function joinRoom() {
     //console.log("joinRoom");
-    const { roomId, userName } = data;
+    const { roomId } = data;
     if (userName && roomId) {
       try {
         const joinRoomResp = await socket.emitWithAck("joinRoom", {

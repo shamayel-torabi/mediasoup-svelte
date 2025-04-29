@@ -6,4 +6,6 @@ export const load: LayoutServerLoad = ({ cookies }) => {
   if (!sessionid) {
     redirect(301, '/login');
   }
+
+  return {user : sessionid}
 };
