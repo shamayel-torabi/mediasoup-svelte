@@ -3,6 +3,11 @@
   let { data, form }: PageProps = $props();
 </script>
 
+<svelte:head>
+  <title>ورود</title>
+  <meta name="description" content="Svelte Video Session app" />
+</svelte:head>
+
 <section class="grid items-center justify-center h-screen">
   <div
     class="w-sm p-2 bg-gray-100 border border-gray-200 rounded-md shadow-sm dark:bg-gray-800 dark:border-gray-700"
@@ -23,7 +28,7 @@
               value={form?.email ?? ""}
               placeholder="name@example.com"
             />
-            {#if form?.emailMissing}<p class="text-red-600">
+            {#if form?.emailMissing}<p class="mt-3 text-red-600">
                 رایانامه باید وارد شود
               </p>
             {/if}
@@ -31,7 +36,7 @@
           <div class="mb-5">
             <label for="password" class="mb-2">گذرواژه</label>
             <input type="password" id="password" name="password" dir="ltr" />
-            {#if form?.passwordMissing}<p class="text-red-600">گذرواژه باید وارد شود</p>
+            {#if form?.passwordMissing}<p class="mt3 text-red-600">گذرواژه باید وارد شود</p>
             {/if}
           </div>
           <div class=",b-5 flex justify-end">

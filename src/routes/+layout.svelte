@@ -8,7 +8,6 @@
 	<main>
 		{@render children()}
 	</main>
-
 </div>
 
 
