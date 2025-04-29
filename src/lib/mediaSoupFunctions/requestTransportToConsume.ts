@@ -8,7 +8,8 @@ const requestTransportToConsume = (
   consumeData: ConsumeData,
   socket: Socket,
   device: Device,
-  consumers: Record<string, ConsumerType>
+  consumers: Record<string,ConsumerType>,
+  remoteVideos: HTMLVideoElement[]
 ) => {
   //how many transports? One for each consumer?
   // Or one that handles all consumers?
@@ -49,10 +50,8 @@ const requestTransportToConsume = (
         audioConsumer?.track,
         videoConsumer?.track,
       ]);
-      const remoteVideo = document.getElementById(
-        `remote-video-${i}`
-      ) as HTMLVideoElement;
-      remoteVideo.srcObject = combinedStream;
+      if (remoteVideos[i])
+        remoteVideos[i].srcObject = combinedStream;
       console.log("Hope this works...");
       consumers[audioPid] = {
         combinedStream,

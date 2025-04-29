@@ -1,63 +1,88 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import { useSocket } from "$lib/useSocket";
-  import { Button } from "flowbite-svelte";
+  import { Button, Card } from "flowbite-svelte";
   import { Device } from "mediasoup-client";
   import requestTransportToConsume from "$lib/mediaSoupFunctions/requestTransportToConsume";
   import type {
     ConsumeData,
     ConsumerType,
   } from "$lib/mediaSoupFunctions/types";
+  import { Producer, Transport } from "mediasoup-client/types";
+  import createProducerTransport from "$lib/mediaSoupFunctions/createProducerTransport";
+  import createProducer from "$lib/mediaSoupFunctions/createProducer";
 
   let { data }: PageProps = $props();
 
   const socket = useSocket();
   let enableFeedBtn = $state(true);
+  let muteBtn = $state(true);
+  let hangUpBtn = $state(true);
 
   let device: Device;
+  let producerTransport: Transport;
+  let videoProducer: Producer;
+  let audioProducer: Producer;
+
   let consumers: Record<string, ConsumerType> = $state({});
 
   let localStream: MediaStream | null = $state(null);
   let localMediaLeft: HTMLVideoElement;
 
-  let remoteMediaMain: HTMLVideoElement;
-  let remoteMediaUserName:string = $state('');
+  let remoteVideos: HTMLVideoElement[] = new Array<HTMLVideoElement>(5);
+  let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
 
   socket.on("connectionSuccess", (data) => {
     console.log(`Connected socketId: ${data.socketId}`);
-    console.log('rooms:', data.rooms)
+    //console.log("rooms:", data.rooms);
   });
-
 
   socket.on("updateActiveSpeakers", async (newListOfActives: string[]) => {
-    // console.log("updateActiveSpeakers")
-    // console.log(newListOfActives)
-    // an array of the most recent 5 dominant speakers. Just grab the 1st
-    // and put it in the slot. Move everything else down
-    // consumers is an {} with key of audioId, value of combined feed
-    console.log("updateActiveSpeakers:", newListOfActives);
-    const aid = newListOfActives[0];
-    const consumerForThisSlot = consumers[aid];
-    remoteMediaMain.srcObject = consumerForThisSlot?.combinedStream;
-    remoteMediaUserName = consumerForThisSlot?.userName;
+    updateRemoteVideos(newListOfActives);
   });
 
-  
+  socket.on("newProducersToConsume", (consumeData) => {
+    // console.log("newProducersToConsume")
+    // console.log(consumeData)
+    requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+  });
+
+  async function updateRemoteVideos(newListOfActives: string[]) {
+    console.log("updateActiveSpeakers:", newListOfActives);
+
+    for (let el of remoteVideos) {
+      el.srcObject = null; //clear out the <video>
+    }
+
+    let slot = 0;
+    newListOfActives.forEach((aid) => {
+      if (aid !== audioProducer?.id) {
+        const remoteVideo = remoteVideos[slot];
+        const remoteVideoUserName = remoteUserNames[slot];
+        const consumerForThisSlot = consumers[aid];
+        remoteVideo.srcObject = consumerForThisSlot?.combinedStream;
+        //remoteVideo.play();
+        remoteVideoUserName.innerHTML = consumerForThisSlot?.userName;
+        slot++; //for the next
+      }
+    });
+  }
+
   async function joinRoom() {
     //console.log("joinRoom");
     const { roomId, userName } = data;
     if (userName && roomId) {
-      const joinRoomResp = await socket.emitWithAck("joinRoom", {
-        userName,
-        roomId,
-      });
-
-      if (joinRoomResp.error) {
-        alert(joinRoomResp.error);
-        return;
-      }
-
       try {
+        const joinRoomResp = await socket.emitWithAck("joinRoom", {
+          userName,
+          roomId,
+        });
+
+        if (joinRoomResp.error) {
+          alert(joinRoomResp.error);
+          return;
+        }
+
         device = new Device();
         await device.load({
           routerRtpCapabilities: joinRoomResp.result?.routerRtpCapabilities!,
@@ -69,9 +94,9 @@
           associatedUserNames: joinRoomResp.result?.associatedUserNames!,
         };
 
-        console.log('consumeData:', consumeData)
+        console.log("consumeData:", consumeData);
 
-        requestTransportToConsume(consumeData, socket, device, consumers);
+        requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
 
         enableFeedBtn = false;
       } catch (error) {
@@ -83,29 +108,40 @@
   async function enableFeed() {
     console.log("enableFeed");
     try {
-      const displayMediaOptions = {
-        video: {
-          cursor: "always",
-          height: 1000,
-          width: 1200,
-        },
-        audio: true,
-      };
-      localStream =
-        await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-
-      // localStream = await navigator.mediaDevices.getUserMedia({
-      //   video: true,
+      // const displayMediaOptions = {
+      //   video: {
+      //     cursor: "always",
+      //     height: 1000,
+      //     width: 1200,
+      //   },
       //   audio: true,
-      // });
+      // };
+      // localStream =
+      //   await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+
+      localStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
 
       if (localStream) {
         localMediaLeft.srcObject = localStream;
+
+        producerTransport = await createProducerTransport(socket, device);
+        const producers = await createProducer(localStream, producerTransport);
+        audioProducer = producers.audioProducer;
+        videoProducer = producers.videoProducer;
+
         enableFeedBtn = true;
+        muteBtn = false;
       }
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async function muteAudio() {
+
   }
 
   joinRoom();
@@ -116,14 +152,17 @@
   <meta name="description" content="Svelte Video Session app" />
 </svelte:head>
 
-<section class="p-2 max-w-[1200px] mx-auto bg-amber-100">
-  <article class="grid grid-cols-[11fr_1fr] gap-2">
-    <div class="grid justify-self-start items-start w-full h-(--page--height)">
-      <div id="username-0" class="h-8 text-center">{remoteMediaUserName}</div>
+<section class="p-2 bg-gray-100">
+  <article class="grid grid-cols-[10fr_2fr] gap-2">
+    <Card
+      size="none"
+      class="grid justify-self-start items-start h-(--page--height)"
+    >
+      <div bind:this={remoteUserNames[0]} class="h-8 text-center"></div>
       <div class="mx-auto">
         <!-- svelte-ignore a11y_media_has_caption -->
         <video
-          bind:this={remoteMediaMain}
+          bind:this={remoteVideos[0]}
           class="h-(--video--height) aspect-video"
           autoplay
           playsinline
@@ -155,7 +194,7 @@
               <rect x="2" y="6" width="14" height="12" rx="2" />
             </svg>
           </Button>
-          <Button id="send-feed" title="برقرای ارتباط" disabled>
+          <!-- <Button id="send-feed" title="برقرای ارتباط" disabled>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -176,8 +215,8 @@
               <path d="M10.5 16.5 13 14" />
               <path d="m18 3-4 4h6l-4 4" />
             </svg>
-          </Button>
-          <Button id="mute" title="صدا" disabled>
+          </Button> -->
+          <Button disabled={muteBtn} onclick={muteAudio} title="صدا">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -198,7 +237,7 @@
               <line x1="12" x2="12" y1="19" y2="22" />
             </svg>
           </Button>
-          <Button id="hang-up" title="قطع ارتباط" disabled>
+          <Button disabled={hangUpBtn} title="قطع ارتباط">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -225,9 +264,9 @@
           </Button>
         </div>
       </div>
-    </div>
-    <div
-      id="remote-media"
+    </Card>
+    <Card
+      size="md"
       class="grid justify-self-start items-start gap-2 overflow-y-auto"
     >
       <div id="local-media">
@@ -242,7 +281,7 @@
       </div>
       <div class="border remote-speaker">
         <video
-          id="remote-video-1"
+          bind:this={remoteVideos[1]}
           class="w-full h-full remote-video"
           autoplay
           playsinline
@@ -252,7 +291,7 @@
       </div>
       <div class="border" style="width: 18%; height: 80px;">
         <video
-          id="remote-video-2"
+          bind:this={remoteVideos[2]}
           class="w-full h-full remote-video"
           autoplay
           playsinline
@@ -262,7 +301,7 @@
       </div>
       <div class="border" style="width: 18%; height: 80px;">
         <video
-          id="remote-video-3"
+          bind:this={remoteVideos[3]}
           class="w-full h-full remote-video"
           autoplay
           playsinline
@@ -272,7 +311,7 @@
       </div>
       <div class="border" style="width: 18%; height: 80px;">
         <video
-          id="remote-video-4"
+          bind:this={remoteVideos[4]}
           class="w-full h-full remote-video"
           autoplay
           playsinline
@@ -280,6 +319,6 @@
         ></video>
         <div id="username-4" class="username text-center"></div>
       </div>
-    </div>
+    </Card>
   </article>
 </section>

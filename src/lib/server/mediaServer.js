@@ -98,10 +98,10 @@ const runMediaSoupServer = async (app) => {
                         result: {
                             routerRtpCapabilities: client.room.router?.rtpCapabilities,
                             newRoom,
+                            messages: client.room.messages,
                             audioPidsToCreate,
                             videoPidsToCreate,
                             associatedUserNames,
-                            messages: client.room.messages,
                         },
                     });
                 }
