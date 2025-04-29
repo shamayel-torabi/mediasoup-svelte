@@ -14,9 +14,9 @@
 
   let { data }: PageProps = $props();
 
-  const socket = useSocket();
   let enableFeedBtn = $state(true);
   let muteBtn = $state(true);
+  let pause = $state(false);
   let hangUpBtn = $state(true);
 
   let device: Device;
@@ -24,13 +24,15 @@
   let videoProducer: Producer;
   let audioProducer: Producer;
 
-  let consumers: Record<string, ConsumerType> = $state({});
+  let consumers: Record<string, ConsumerType> = {};
 
-  let localStream: MediaStream | null = $state(null);
+  let localStream: MediaStream;
   let localMediaLeft: HTMLVideoElement;
 
   let remoteVideos: HTMLVideoElement[] = new Array<HTMLVideoElement>(5);
   let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
+
+  const socket = useSocket();
 
   socket.on("connectionSuccess", (data) => {
     console.log(`Connected socketId: ${data.socketId}`);
@@ -44,11 +46,17 @@
   socket.on("newProducersToConsume", (consumeData) => {
     // console.log("newProducersToConsume")
     // console.log(consumeData)
-    requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+    requestTransportToConsume(
+      consumeData,
+      socket,
+      device,
+      consumers,
+      remoteVideos
+    );
   });
 
   async function updateRemoteVideos(newListOfActives: string[]) {
-    console.log("updateActiveSpeakers:", newListOfActives);
+    //console.log("updateActiveSpeakers:", newListOfActives);
 
     for (let el of remoteVideos) {
       el.srcObject = null; //clear out the <video>
@@ -60,8 +68,8 @@
         const remoteVideo = remoteVideos[slot];
         const remoteVideoUserName = remoteUserNames[slot];
         const consumerForThisSlot = consumers[aid];
+
         remoteVideo.srcObject = consumerForThisSlot?.combinedStream;
-        //remoteVideo.play();
         remoteVideoUserName.innerHTML = consumerForThisSlot?.userName;
         slot++; //for the next
       }
@@ -94,9 +102,15 @@
           associatedUserNames: joinRoomResp.result?.associatedUserNames!,
         };
 
-        console.log("consumeData:", consumeData);
+        //console.log("consumeData:", consumeData);
 
-        requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+        requestTransportToConsume(
+          consumeData,
+          socket,
+          device,
+          consumers,
+          remoteVideos
+        );
 
         enableFeedBtn = false;
       } catch (error) {
@@ -106,7 +120,7 @@
   }
 
   async function enableFeed() {
-    console.log("enableFeed");
+    //console.log("enableFeed");
     try {
       // const displayMediaOptions = {
       //   video: {
@@ -134,6 +148,7 @@
 
         enableFeedBtn = true;
         muteBtn = false;
+        hangUpBtn = false;
       }
     } catch (error) {
       console.log(error);
@@ -141,7 +156,19 @@
   }
 
   async function muteAudio() {
+    if (audioProducer.paused) {
+      audioProducer.resume();
+      pause = false;
+      socket.emit("audioChange", "unmute");
+    } else {
+      audioProducer.pause();
+      pause = true;
+      socket.emit("audioChange", "mute");
+    }
+  }
 
+  async function hangUp() {
+    //console.log('hangUp');
   }
 
   joinRoom();
@@ -158,20 +185,21 @@
       size="none"
       class="grid justify-self-start items-start h-(--page--height)"
     >
-      <div bind:this={remoteUserNames[0]} class="h-8 text-center"></div>
+      <div bind:this={remoteUserNames[0]} class="h-6 text-center"></div>
       <div class="mx-auto">
         <!-- svelte-ignore a11y_media_has_caption -->
         <video
           bind:this={remoteVideos[0]}
           class="h-(--video--height) aspect-video"
           autoplay
-          playsinline
           controls
+          playsinline
         ></video>
       </div>
-      <div class="grid justify-center">
+      <div class="grid justify-center my-1">
         <div>
           <Button
+            class="py-1 px-3"
             disabled={enableFeedBtn}
             onclick={enableFeed}
             title="ارسال تصاویر"
@@ -194,50 +222,66 @@
               <rect x="2" y="6" width="14" height="12" rx="2" />
             </svg>
           </Button>
-          <!-- <Button id="send-feed" title="برقرای ارتباط" disabled>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-plug-zap-icon lucide-plug-zap"
+          {#if pause}
+            <Button
+              class="py-1 px-3"
+              disabled={muteBtn}
+              onclick={muteAudio}
+              title="صدا"
             >
-              <path
-                d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"
-              />
-              <path d="m2 22 3-3" />
-              <path d="M7.5 13.5 10 11" />
-              <path d="M10.5 16.5 13 14" />
-              <path d="m18 3-4 4h6l-4 4" />
-            </svg>
-          </Button> -->
-          <Button disabled={muteBtn} onclick={muteAudio} title="صدا">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-mic-off-icon lucide-mic-off"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-mic-off-icon lucide-mic-off"
+              >
+                <line x1="2" x2="22" y1="2" y2="22" />
+                <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+                <path d="M5 10v2a7 7 0 0 0 12 5" />
+                <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
+                <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            </Button>
+          {:else}
+            <Button
+              class="py-1 px-3"
+              disabled={muteBtn}
+              onclick={muteAudio}
+              title="صدا"
             >
-              <line x1="2" x2="22" y1="2" y2="22" />
-              <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
-              <path d="M5 10v2a7 7 0 0 0 12 5" />
-              <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
-              <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
-              <line x1="12" x2="12" y1="19" y2="22" />
-            </svg>
-          </Button>
-          <Button disabled={hangUpBtn} title="قطع ارتباط">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-mic-icon lucide-mic"
+              >
+                <path
+                  d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"
+                />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" x2="12" y1="19" y2="22" />
+              </svg>
+            </Button>
+          {/if}
+          <Button
+            class="py-1 px-3"
+            disabled={hangUpBtn}
+            onclick={hangUp}
+            title="قطع ارتباط"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -280,6 +324,7 @@
         <div class="text-center">{data.userName}</div>
       </div>
       <div class="border remote-speaker">
+        <!-- svelte-ignore a11y_media_has_caption -->
         <video
           bind:this={remoteVideos[1]}
           class="w-full h-full remote-video"
@@ -287,9 +332,10 @@
           playsinline
           controls
         ></video>
-        <div id="username-1" class="username text-center"></div>
+        <div bind:this={remoteUserNames[1]} class="username text-center"></div>
       </div>
       <div class="border" style="width: 18%; height: 80px;">
+        <!-- svelte-ignore a11y_media_has_caption -->
         <video
           bind:this={remoteVideos[2]}
           class="w-full h-full remote-video"
@@ -297,9 +343,10 @@
           playsinline
           controls
         ></video>
-        <div id="username-2" class="username text-center"></div>
+        <div bind:this={remoteUserNames[2]} class="username text-center"></div>
       </div>
       <div class="border" style="width: 18%; height: 80px;">
+        <!-- svelte-ignore a11y_media_has_caption -->
         <video
           bind:this={remoteVideos[3]}
           class="w-full h-full remote-video"
@@ -307,9 +354,10 @@
           playsinline
           controls
         ></video>
-        <div id="username-3" class="username text-center"></div>
+        <div bind:this={remoteUserNames[3]} class="username text-center"></div>
       </div>
       <div class="border" style="width: 18%; height: 80px;">
+        <!-- svelte-ignore a11y_media_has_caption -->
         <video
           bind:this={remoteVideos[4]}
           class="w-full h-full remote-video"
@@ -317,7 +365,7 @@
           playsinline
           controls
         ></video>
-        <div id="username-4" class="username text-center"></div>
+        <div bind:this={remoteUserNames[4]} class="username text-center"></div>
       </div>
     </Card>
   </article>
