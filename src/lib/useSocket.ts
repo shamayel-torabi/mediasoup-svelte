@@ -1,10 +1,28 @@
 import { io, Socket } from "socket.io-client";
-import type { ClientParamsType, ClientTransportOptions, ConsumeData, Message, RoomType } from "./types";
-import type { DtlsParameters, MediaKind, RtpCapabilities, RtpParameters } from "mediasoup-client/types";
+import type {
+  ClientParamsType,
+  ClientTransportOptions,
+  ConsumeData,
+  Message,
+  RoomType,
+} from "./types";
+import type {
+  DtlsParameters,
+  MediaKind,
+  RtpCapabilities,
+  RtpParameters,
+} from "mediasoup-client/types";
 
 interface ClientToServerEvents {
-  sendMessage: ({    text,    userName,    roomId,  }: {
-    text: string;    userName: string;    roomId: string;  }) => void;
+  sendMessage: ({
+    text,
+    userName,
+    roomId,
+  }: {
+    text: string;
+    userName: string;
+    roomId: string;
+  }) => void;
   createRoom: (
     roomName: string,
     ackCb: (result: { roomId?: string; error?: string }) => void
@@ -65,7 +83,7 @@ interface ServerToClientEvents {
   newMessage: (message: Message) => void;
   newRoom: (room: { roomId: string; roomName: string }) => void;
   newProducersToConsume: (consumeData: ConsumeData) => void;
-  updateActiveSpeakers: (newListOfActives: string[]) => Promise<void>;
+  updateActiveSpeakers: (newListOfActives: string[]) => void;
 }
 
 export type SocketType = Socket<ServerToClientEvents, ClientToServerEvents>;

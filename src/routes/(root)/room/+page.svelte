@@ -21,7 +21,13 @@
   let localMediaLeft: HTMLVideoElement;
 
   let remoteMediaMain: HTMLVideoElement;
-  let remoteMediaUserName:string = $state('')
+  let remoteMediaUserName:string = $state('');
+
+  socket.on("connectionSuccess", (data) => {
+    console.log(`Connected socketId: ${data.socketId}`);
+    console.log('rooms:', data.rooms)
+  });
+
 
   socket.on("updateActiveSpeakers", async (newListOfActives: string[]) => {
     // console.log("updateActiveSpeakers")

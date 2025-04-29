@@ -1,11 +1,20 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import type { RoomType } from "$lib/types";
   import { useSocket } from "$lib/useSocket";
   import { Button, Card, Input, Label } from "flowbite-svelte";
 
   const socket = useSocket();
+  socket.on("connectionSuccess", (data) => {
+    console.log(`Connected socketId: ${data.socketId}`);
+    rooms = data.rooms
+  });
+
   let roomNameError: Boolean;
   let userNameError: Boolean;
+  let rooms: RoomType[] = $state([]);
+
+  console.log('rooms:', rooms)
 
   async function handleSubmit(event: SubmitEvent) {
     event.preventDefault();
