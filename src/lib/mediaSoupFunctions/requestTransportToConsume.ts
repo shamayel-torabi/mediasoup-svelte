@@ -2,7 +2,7 @@ import { Socket } from "socket.io-client";
 import createConsumer from "./createConsumer";
 import createConsumerTransport from "./createConsumerTransport";
 import { Device } from "mediasoup-client";
-import type { ConsumeData, ConsumerType } from "$lib/types";
+import type { ConsumeData, ConsumerType } from "./types";
 
 const requestTransportToConsume = (
   consumeData: ConsumeData,
@@ -63,6 +63,7 @@ const requestTransportToConsume = (
       };
     } catch (error) {
       console.log(error);
+      throw new Error('requestTransportToConsume error')
     }
   });
 };

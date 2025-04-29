@@ -1,7 +1,6 @@
-import { Consumer, Transport, type RtpCapabilities } from "mediasoup-client/types";
+import { Consumer, Transport } from "mediasoup-client/types";
 
 export type ConsumeData = {
-    routerRtpCapabilities: RtpCapabilities;
     audioPidsToCreate: string[];
     videoPidsToCreate: string[];
     associatedUserNames: string[];
@@ -15,3 +14,4 @@ export type ConsumerType = {
   audioConsumer: Consumer;
   videoConsumer: Consumer;
 }
+
