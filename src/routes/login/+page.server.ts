@@ -2,9 +2,9 @@ import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ cookies }) => {
-  const email = cookies.get("sessionid");
-  if(email){
-    redirect(303, '/')
+  const sessionid = cookies.get("sessionid");
+  if (sessionid) {
+    redirect(303, "/");
   }
 };
 
@@ -13,20 +13,29 @@ export const actions = {
     const data = await request.formData();
     const email = data.get("email") as string;
     const password = data.get("password") as string;
+    let emailMissing = false;
+    let passwordMissing = false;
+    let incorrect = false;
 
     if (!email) {
-			return fail(400, { email, emailMissing: true });
-		}
-
-    if (!password) {
-			return fail(400, {email, passwordMissing: true });
-		}   
-
-    if(email === 'shamayel.torabi@gmail.com' && password === 'sham'){
-      cookies.set('sessionid', email , { path: '/' });
-      redirect(303, '/'); 
+      emailMissing = true;
     }
 
-    return fail(400, { email, incorrect: true });
-  }
+    if (!password) {
+      passwordMissing = true;
+    }
+
+    if(!password || !email){
+      return fail(400, { email, emailMissing, passwordMissing, incorrect });
+    }
+
+    if (email === "shamayel.torabi@gmail.com" && password === "sham") {
+      cookies.set("sessionid", email, { path: "/" });
+      redirect(303, "/");
+    }
+    
+    incorrect = true;
+
+    return fail(400, { email, emailMissing, passwordMissing, incorrect });
+  },
 } satisfies Actions;

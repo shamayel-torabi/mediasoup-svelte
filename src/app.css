@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin 'flowbite/plugin';
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -7,34 +8,28 @@
   --header-height: 3em;
   --page--height: calc(100vh - var(--header-height));
   --video--height: calc(var(--page--height) - calc(var(--spacing) * 36));
+
+  --color-primary-50: #fff5f2;
+  --color-primary-100: #fff1ee;
+  --color-primary-200: #ffe4de;
+  --color-primary-300: #ffd5cc;
+  --color-primary-400: #ffbcad;
+  --color-primary-500: #fe795d;
+  --color-primary-600: #ef562f;
+  --color-primary-700: #eb4f27;
+  --color-primary-800: #cc4522;
+  --color-primary-900: #a5371b;
 }
+
+@layer base {
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+}
+@source "../node_modules/flowbite-svelte/dist";
 
 html,
 body {
   @apply bg-white dark:bg-gray-950;
-}
-
-button {
-  @apply py-1.5 px-4 me-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600;
-}
-button.enable {
-  @apply hover:text-blue-700 dark:hover:text-white dark:hover:bg-gray-700;
-}
-button.disabled{
-  @apply cursor-not-allowed
-}
-
-label {
-  @apply block mb-2 text-sm font-medium text-gray-900 dark:text-white;
-}
-
-input {
-  @apply bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
-}
-
-.card {
-  @apply max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700;
-}
-.card-title {
-  @apply mb-4 text-2xl font-bold tracking-tight text-gray-900 dark:text-white;
 }

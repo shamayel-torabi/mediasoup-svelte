@@ -20,6 +20,8 @@
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"cross-env": "^7.0.3",
+		"flowbite": "^3.1.2",
+		"flowbite-svelte": "^0.48.6",
 		"svelte": "^5.25.0",
 		"svelte-check": "^4.0.0",
 		"typescript": "^5.0.0",

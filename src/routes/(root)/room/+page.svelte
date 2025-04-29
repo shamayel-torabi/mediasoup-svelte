@@ -7,6 +7,11 @@
   
 </script>
 
+<svelte:head>
+  <title>نشست</title>
+  <meta name="description" content="Svelte Video Session app" />
+</svelte:head>
+
 <section class="h-screen overflow-y-auto p-2">
   <article class="grid grid-cols-[11fr_1fr] gap-2">
       <div class="grid justify-self-start items-start w-full h-(--page--height)">

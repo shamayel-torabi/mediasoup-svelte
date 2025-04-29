@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { useSocket } from "$lib/useSocket";
+  import { Button, Card, Input, Label } from "flowbite-svelte";
 
   const socket = useSocket();
   let roomNameError: Boolean = false;
@@ -30,22 +31,24 @@
   <meta name="description" content="Svelte Video Session app" />
 </svelte:head>
 
-<section class="overflow-y-auto">
+<section>
   <article class="grid items-center justify-center h-screen">
-    <div class="card w-[24rem]">
-      <h5 class="card-title">پیوستن به نشست</h5>
-      <form onsubmit={handleSubmit} class="max-w-sm mx-auto">
-        <div class="mb-3">
-          <label for="room">نام نشست</label>
-          <input type="text" id="room" name="room" placeholder="Room Name" />
+    <Card class="w-sm p-2">
+      <form onsubmit={handleSubmit} class="space-y-6">
+        <h5 class="text-xl font-medium text-gray-900 dark:text-white">
+          پیوستن به نشست
+        </h5>
+        <div >
+          <Label for="room">نام نشست</Label>
+          <Input type="text" id="room" name="room" placeholder="Room Name" />
           {#if roomNameError}<p class="mt-3 text-red-600">
               نام نشست باید وارد شود
             </p>
           {/if}
         </div>
-        <div class="mb-3">
-          <label for="username">نام کاربر</label>
-          <input
+        <div>
+          <Label for="username">نام کاربر</Label>
+          <Input
             type="text"
             id="username"
             name="username"
@@ -57,9 +60,9 @@
           {/if}
         </div>
         <div class="grid justify-end">
-          <button type="submit">پیوستن</button>
+          <Button type="submit">پیوستن</Button>
         </div>
       </form>
-    </div>
+    </Card>
   </article>
 </section>
