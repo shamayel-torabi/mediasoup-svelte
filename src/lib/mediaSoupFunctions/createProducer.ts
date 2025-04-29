@@ -16,7 +16,7 @@ const createProducer = (localStream: MediaStream, producerTransport: Transport)=
             resolve({audioProducer,videoProducer})
         }catch(err){
             console.log(err,"error producing")
-            reject("error producing")
+            reject("Error createProducer")
         }
     })
 }

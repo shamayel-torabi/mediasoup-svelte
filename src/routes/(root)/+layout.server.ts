@@ -4,6 +4,6 @@ import type { LayoutServerLoad } from "./$types";
 export const load: LayoutServerLoad = ({ cookies }) => {
   const sessionid = cookies.get("sessionid");
   if (!sessionid) {
-    redirect(307, '/login');
+    redirect(301, '/login');
   }
 };

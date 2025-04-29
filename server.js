@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import { createServer } from "vite";
 import runMediaSoupServer from './src/lib/server/mediaServer.js'
 
@@ -19,6 +20,7 @@ if (isDevelopment) {
   const compression = (await import("compression")).default;
   const handler = (await import("./build/handler.js")).handler;
 
+  app.use(cors());
   app.use(compression());
 
   app.get("/healthcheck", (req, res) => {

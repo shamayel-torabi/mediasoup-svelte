@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from "./$types";
 export const load: PageServerLoad = async ({ cookies }) => {
   const sessionid = cookies.get("sessionid");
   if (sessionid) {
-    redirect(303, "/");
+    throw redirect(301, "/");
   }
 };
 
@@ -31,7 +31,7 @@ export const actions = {
 
     if (email === "shamayel.torabi@gmail.com" && password === "sham") {
       cookies.set("sessionid", email, { path: "/" });
-      redirect(303, "/");
+      throw redirect(301, "/");
     }
     
     incorrect = true;
