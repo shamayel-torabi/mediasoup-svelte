@@ -1,11 +1,14 @@
 import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
+import { users } from "$lib/users";
 
 export const load: LayoutServerLoad = ({ cookies }) => {
-  const sessionid = cookies.get("sessionid");
-  if (!sessionid) {
-    redirect(301, '/login');
+  const email = cookies.get("sessionid");
+  if (!email) {
+    redirect(301, "/login");
   }
 
-  return {user : sessionid}
+  const user = users.find((u) => u.email === email);
+
+  return { user };
 };

@@ -9,6 +9,13 @@ import type {
   Transport,
 } from "mediasoup/types";
 
+export type User = {
+  email: string,
+  password:string,
+  firstName: string,
+  lastName:string,
+  role: 'admin' | 'user'
+}
 export type Message = {
   id: string;
   text: string;

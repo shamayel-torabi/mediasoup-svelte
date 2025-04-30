@@ -12,12 +12,14 @@
   import createProducerTransport from "$lib/mediaSoupFunctions/createProducerTransport";
   import createProducer from "$lib/mediaSoupFunctions/createProducer";
   import { getContext } from "svelte";
-  import type { Message } from "$lib/types";
+  import type { Message, User } from "$lib/types";
   import MessageBox from "$lib/MessageBox.svelte";
+  import { goto } from "$app/navigation";
 
   let { data }: PageProps = $props();
-  const user = getContext<() => { user: string }>("user");
-  const userName = user().user;
+  const context = getContext<() => { user: User }>("user");
+  const user = context().user;
+  const userName = `${user.firstName} ${user.lastName}`
 
   let enableFeedBtn = $state(true);
   let muteBtn = $state(true);
@@ -98,7 +100,7 @@
 
         if (joinRoomResp.error) {
           alert(joinRoomResp.error);
-          return;
+          goto('/');
         }
 
         messages = joinRoomResp.result?.messages!;
