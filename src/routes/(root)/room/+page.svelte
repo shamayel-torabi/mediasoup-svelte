@@ -189,8 +189,9 @@
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const text = formData.get("message") as string;
+    console.log()
     if (text) {
-      socket?.emit("sendMessage", { text, userName, roomId: data.roomId });
+      socket?.emit("sendMessage", { text, userName, roomId: data.roomId! });
       (e.target as HTMLFormElement).reset();
     }
   }
@@ -203,9 +204,9 @@
   <meta name="description" content="Svelte Video Session app" />
 </svelte:head>
 
-<section class="p-2 bg-gray-100">
-  <article class="grid grid-cols-[10fr_16rem] gap-1">
-    <Card size="none" class="grid grid-rows-[10fr_12rem] gap-1" padding="none">
+<section class="p-2 bg-gray-100 h-(--page--height)">
+  <article class="grid grid-cols-[10fr_17rem] gap-1">
+    <Card size="none" class="grid grid-rows-[1fr_12rem] gap-1" padding="none">
       <Card
         size="none"
         class="p-1 grid grid-rows-[1fr_2rem_2rem] items-center"
@@ -409,17 +410,17 @@
         </div>
       </Card>
     </Card>
-    <Card size="none" class="p-2 grid grid-rows-[1fr_3rem]" padding="none">
-      <div class="bg-gray-200">
-        <ul>
+    <Card size="none" padding="none">
+      <div class="h-(--message--pane)">
+        <ul class="h-full overflow-y-auto p-2">
           {#each messages as message}
             <MessageBox {message} />
           {/each}
         </ul>
       </div>
-      <div class="py-2">
+      <div class="m-2">
         <form onsubmit={sendMessage} class="flex">
-          <Input class="rounded-none rounded-s-md ps-0" />
+          <Input name="message" class="rounded-none rounded-s-md" />
           <button
             aria-label="send"
             type="submit"
