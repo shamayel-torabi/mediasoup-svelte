@@ -15,11 +15,15 @@
   import type { Message, User } from "$lib/types";
   import MessageBox from "$lib/MessageBox.svelte";
   import { goto } from "$app/navigation";
+  import { Toast } from 'flowbite-svelte';
+  import { slide } from 'svelte/transition';
+
+
 
   let { data }: PageProps = $props();
   const context = getContext<() => { user: User }>("user");
   const user = context().user;
-  const userName = `${user.firstName} ${user.lastName}`
+  const userName = `${user.firstName} ${user.lastName}`;
 
   let enableFeedBtn = $state(true);
   let muteBtn = $state(true);
@@ -41,6 +45,13 @@
   let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
 
   const socket = useSocket();
+  let toastStatus = $state(false);
+  let toastText: string = $state('');
+
+  function trigger(text: string) {
+    toastStatus = true;
+    toastText = text;
+  }  
 
   socket.on("connectionSuccess", (data) => {
     console.log(`Connected socketId: ${data.socketId}`);
@@ -48,7 +59,7 @@
   });
 
   socket.on("newMessage", (message) => {
-    messages.push(message)
+    messages.push(message);
   });
 
   socket.on("updateActiveSpeakers", async (newListOfActives: string[]) => {
@@ -100,7 +111,8 @@
 
         if (joinRoomResp.error) {
           alert(joinRoomResp.error);
-          goto('/');
+          trigger('خطا هنگام پیوستن به نشست!');
+          goto("/");
         }
 
         messages = joinRoomResp.result?.messages!;
@@ -165,6 +177,7 @@
         hangUpBtn = false;
       }
     } catch (error) {
+      trigger('خطا هنگام ارسال تصاویر ویدئویی!');
       console.log(error);
     }
   }
@@ -187,11 +200,9 @@
 
   async function sendMessage(e: SubmitEvent) {
     e.preventDefault();
-    console.log("message submit");
 
     const formData = new FormData(e.currentTarget as HTMLFormElement);
     const text = formData.get("message") as string;
-    console.log()
     if (text) {
       socket?.emit("sendMessage", { text, userName, roomId: data.roomId! });
       (e.target as HTMLFormElement).reset();
@@ -420,9 +431,9 @@
           {/each}
         </ul>
       </div>
-      <div class="m-2">
+      <div class="m-1">
         <form onsubmit={sendMessage} class="flex">
-          <Input name="message" class="rounded-none rounded-s-md" />
+          <Input name="message" class="rounded-none rounded-s-md" placeholder="پیام را وارد کنید" />
           <button
             aria-label="send"
             type="submit"
@@ -444,4 +455,7 @@
       </div>
     </Card>
   </article>
+  <Toast  position="top-left" bind:toastStatus color="red">
+    {toastText}
+  </Toast>
 </section>

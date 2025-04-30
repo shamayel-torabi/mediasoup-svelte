@@ -7,7 +7,7 @@
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --page--height: calc(100vh - calc(var(--spacing) * 4));
   --video--height: calc(var(--page--height) - calc(var(--spacing) * 68));
-  --message--pane: calc(var(--page--height) - calc(var(--spacing) * 4) - 3rem);
+  --message--pane: calc(var(--page--height) - calc(var(--spacing) * 2) - 3rem);
 
   --color-primary-50: #fff5f2;
   --color-primary-100: #fff1ee;
