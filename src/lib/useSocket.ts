@@ -36,6 +36,7 @@ interface ClientToServerEvents {
       result?: {
         routerRtpCapabilities: RtpCapabilities;
         newRoom: boolean;
+        clientId: string;
         audioPidsToCreate: string[];
         videoPidsToCreate: string[];
         associatedUserNames: string[];
@@ -43,6 +44,10 @@ interface ClientToServerEvents {
       };
       error?: string;
     }) => void
+  ) => void;
+  closeClient: (
+    data: { roomId: string; clientId: string },
+    ackCb: (result: { status: string }) => void
   ) => void;
   closeRoom: (
     data: { roomId: string },

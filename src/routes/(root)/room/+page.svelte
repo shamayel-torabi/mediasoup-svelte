@@ -15,10 +15,7 @@
   import type { Message, User } from "$lib/types";
   import MessageBox from "$lib/MessageBox.svelte";
   import { goto } from "$app/navigation";
-  import { Toast } from 'flowbite-svelte';
-  import { slide } from 'svelte/transition';
-
-
+  import { Toast } from "flowbite-svelte";
 
   let { data }: PageProps = $props();
   const context = getContext<() => { user: User }>("user");
@@ -29,7 +26,11 @@
   let muteBtn = $state(true);
   let pause = $state(false);
   let hangUpBtn = $state(true);
+  let toastStatus = $state(false);
+  let toastText: string = $state("");
+
   let messages: Message[] = $state([]);
+  let clientId: string;
 
   let device: Device;
   let producerTransport: Transport;
@@ -45,13 +46,6 @@
   let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
 
   const socket = useSocket();
-  let toastStatus = $state(false);
-  let toastText: string = $state('');
-
-  function trigger(text: string) {
-    toastStatus = true;
-    toastText = text;
-  }  
 
   socket.on("connectionSuccess", (data) => {
     console.log(`Connected socketId: ${data.socketId}`);
@@ -77,6 +71,11 @@
       remoteVideos
     );
   });
+
+  function trigger(text: string) {
+    toastStatus = true;
+    toastText = text;
+  }
 
   async function updateRemoteVideos(newListOfActives: string[]) {
     //console.log("updateActiveSpeakers:", newListOfActives);
@@ -111,11 +110,12 @@
 
         if (joinRoomResp.error) {
           alert(joinRoomResp.error);
-          trigger('خطا هنگام پیوستن به نشست!');
+          trigger("خطا هنگام پیوستن به نشست!");
           goto("/");
         }
 
         messages = joinRoomResp.result?.messages!;
+        clientId = joinRoomResp.result?.clientId!;
 
         device = new Device();
         await device.load({
@@ -148,21 +148,21 @@
   async function enableFeed() {
     //console.log("enableFeed");
     try {
-      // const displayMediaOptions = {
-      //   video: {
-      //     cursor: "always",
-      //     height: 1000,
-      //     width: 1200,
-      //   },
-      //   audio: true,
-      // };
-      // localStream =
-      //   await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-
-      localStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+      const displayMediaOptions = {
+        video: {
+          cursor: "always",
+          height: 1000,
+          width: 1200,
+        },
         audio: true,
-      });
+      };
+      localStream =
+        await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+
+      // localStream = await navigator.mediaDevices.getUserMedia({
+      //   video: true,
+      //   audio: true,
+      // });
 
       if (localStream) {
         localMediaLeft.srcObject = localStream;
@@ -177,7 +177,7 @@
         hangUpBtn = false;
       }
     } catch (error) {
-      trigger('خطا هنگام ارسال تصاویر ویدئویی!');
+      trigger("خطا هنگام ارسال تصاویر ویدئویی!");
       console.log(error);
     }
   }
@@ -196,6 +196,26 @@
 
   async function hangUp() {
     //console.log('hangUp');
+    const { roomId } = data;
+    if (roomId) {
+      const result = await socket.emitWithAck("closeClient", {
+        roomId,
+        clientId,
+      });
+      
+      if (result.status !== "success") {
+        trigger("خطا هنگام خروج از نشست!");
+      }
+
+      producerTransport?.close();
+      for (const [audioPid, consumer] of Object.entries(consumers)) {
+        consumer?.consumerTransport?.close();
+      }
+
+      enableFeedBtn = false;
+      muteBtn = true;
+      hangUpBtn = true;
+    }
   }
 
   async function sendMessage(e: SubmitEvent) {
@@ -433,7 +453,11 @@
       </div>
       <div class="m-1">
         <form onsubmit={sendMessage} class="flex">
-          <Input name="message" class="rounded-none rounded-s-md" placeholder="پیام را وارد کنید" />
+          <Input
+            name="message"
+            class="rounded-none rounded-s-md"
+            placeholder="پیام را وارد کنید"
+          />
           <button
             aria-label="send"
             type="submit"
@@ -455,7 +479,7 @@
       </div>
     </Card>
   </article>
-  <Toast  position="top-left" bind:toastStatus color="red">
+  <Toast position="top-left" bind:toastStatus color="red">
     {toastText}
   </Toast>
 </section>

@@ -11,7 +11,7 @@ export const users: User[] = [
   {
     email: "sh-torabi@hrec.co.ir",
     password: "sham",
-    firstName: "شمایل",
+    firstName: "شم",
     lastName: "ترابی",
     role: 'user'
   },

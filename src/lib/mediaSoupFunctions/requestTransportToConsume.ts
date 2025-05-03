@@ -52,6 +52,7 @@ const requestTransportToConsume = (
       ]);
       if (remoteVideos[i])
         remoteVideos[i].srcObject = combinedStream;
+      
       console.log("Hope this works...");
       consumers[audioPid] = {
         combinedStream,
