@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import { useSocket } from "$lib/useSocket";
-  import { Button, Card, Input } from "flowbite-svelte";
+  import { Button, Card, Input, Video } from "flowbite-svelte";
   import { Device } from "mediasoup-client";
   import requestTransportToConsume from "$lib/mediaSoupFunctions/requestTransportToConsume";
   import type {
@@ -16,6 +16,16 @@
   import MessageBox from "$lib/MessageBox.svelte";
   import { goto } from "$app/navigation";
   import { Toast } from "flowbite-svelte";
+  import {
+    AddressBookOutline,
+    DesktopPcOutline,
+    MicrophoneOutline,
+    MicrophoneSlashOutline,
+    UsersGroupOutline,
+    VideoCameraOutline,
+  } from "flowbite-svelte-icons";
+
+  type VideoStream = "camera" | "desktop";
 
   let { data }: PageProps = $props();
   const context = getContext<() => { user: User }>("user");
@@ -145,40 +155,46 @@
     }
   }
 
-  async function enableFeed() {
+  async function enableFeed(source: VideoStream) {
     //console.log("enableFeed");
     try {
-      const displayMediaOptions = {
-        video: {
-          cursor: "always",
-          height: 1000,
-          width: 1200,
-        },
-        audio: true,
-      };
-      localStream =
-        await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+      if (source == "camera") {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+      } else {
+        const displayMediaOptions = {
+          video: {
+            cursor: "always",
+            height: 1000,
+            width: 1200,
+          },
+          audio: true,
+        };
+        localStream =
+          await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
 
-      // localStream = await navigator.mediaDevices.getUserMedia({
-      //   video: true,
-      //   audio: true,
-      // });
-
-      if (localStream) {
-        localMediaLeft.srcObject = localStream;
-
-        producerTransport = await createProducerTransport(socket, device);
-        const producers = await createProducer(localStream, producerTransport);
-        audioProducer = producers.audioProducer;
-        videoProducer = producers.videoProducer;
-
-        enableFeedBtn = true;
-        muteBtn = false;
-        hangUpBtn = false;
+        await sendFeed();
       }
     } catch (error) {
       trigger("خطا هنگام ارسال تصاویر ویدئویی!");
       console.log(error);
+    }
+  }
+
+  async function sendFeed() {
+    if (localStream) {
+      localMediaLeft.srcObject = localStream;
+
+      producerTransport = await createProducerTransport(socket, device);
+      const producers = await createProducer(localStream, producerTransport);
+      audioProducer = producers.audioProducer;
+      videoProducer = producers.videoProducer;
+
+      enableFeedBtn = true;
+      muteBtn = false;
+      hangUpBtn = false;
     }
   }
 
@@ -202,7 +218,7 @@
         roomId,
         clientId,
       });
-      
+
       if (result.status !== "success") {
         trigger("خطا هنگام خروج از نشست!");
       }
@@ -261,26 +277,18 @@
             <Button
               class="py-1 px-3"
               disabled={enableFeedBtn}
-              onclick={enableFeed}
-              title="ارسال تصاویر"
+              onclick={() => enableFeed("camera")}
+              title="ارسال تصاویر دوربین"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-video-icon lucide-video"
-              >
-                <path
-                  d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"
-                />
-                <rect x="2" y="6" width="14" height="12" rx="2" />
-              </svg>
+              <VideoCameraOutline />
+            </Button>
+            <Button
+              class="py-1 px-3"
+              disabled={enableFeedBtn}
+              onclick={() => enableFeed("desktop")}
+              title="ارسال تصاویر صفحه نمایش"
+            >
+              <DesktopPcOutline />
             </Button>
             {#if pause}
               <Button
@@ -289,25 +297,7 @@
                 onclick={muteAudio}
                 title="صدا"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-mic-off-icon lucide-mic-off"
-                >
-                  <line x1="2" x2="22" y1="2" y2="22" />
-                  <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
-                  <path d="M5 10v2a7 7 0 0 0 12 5" />
-                  <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
-                  <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
-                  <line x1="12" x2="12" y1="19" y2="22" />
-                </svg>
+                <MicrophoneOutline />
               </Button>
             {:else}
               <Button
@@ -316,24 +306,7 @@
                 onclick={muteAudio}
                 title="صدا"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-mic-icon lucide-mic"
-                >
-                  <path
-                    d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"
-                  />
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                  <line x1="12" x2="12" y1="19" y2="22" />
-                </svg>
+                <MicrophoneSlashOutline />
               </Button>
             {/if}
             <Button
@@ -342,29 +315,7 @@
               onclick={hangUp}
               title="قطع ارتباط"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="lucide lucide-unplug-icon lucide-unplug"
-              >
-                <path d="m19 5 3-3" />
-                <path d="m2 22 3-3" />
-                <path
-                  d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"
-                />
-                <path d="M7.5 13.5 10 11" />
-                <path d="M10.5 16.5 13 14" />
-                <path
-                  d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"
-                />
-              </svg>
+              <UsersGroupOutline />
             </Button>
           </div>
         </div>
@@ -381,7 +332,6 @@
             muted
             autoplay
             playsinline
-            controls
           ></video>
           <div class="text-center">{userName}</div>
         </div>
@@ -479,7 +429,12 @@
       </div>
     </Card>
   </article>
-  <Toast position="top-left" bind:toastStatus color="red">
-    {toastText}
+  <Toast
+    position="top-left"
+    bind:toastStatus
+    color="primary"
+    divClass="w-full max-w-xs p-4 text-white bg-red-500 shadow-sm gap-3"
+  >
+    <div class="flex gap-2"><AddressBookOutline /> {toastText}</div>
   </Toast>
 </section>

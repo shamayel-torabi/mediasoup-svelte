@@ -23,6 +23,7 @@
 		"cross-env": "^7.0.3",
 		"flowbite": "^3.1.2",
 		"flowbite-svelte": "^0.48.6",
+		"flowbite-svelte-icons": "^2.1.1",
 		"svelte": "^5.25.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^4.1.4",
