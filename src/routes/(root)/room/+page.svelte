@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
   import { useSocket } from "$lib/useSocket";
-  import { Button, Card, Input } from "flowbite-svelte";
+  import { Button, Card, Input, Video } from "flowbite-svelte";
   import { Device } from "mediasoup-client";
   import requestTransportToConsume from "$lib/mediaSoupFunctions/requestTransportToConsume";
   import type {
@@ -24,7 +24,6 @@
     UsersGroupOutline,
     VideoCameraOutline,
   } from "flowbite-svelte-icons";
-  import VideoPane from "$lib/VideoPane.svelte";
 
   type VideoStream = "camera" | "desktop";
 
@@ -39,10 +38,9 @@
   let hangUpBtn = $state(true);
   let toastStatus = $state(false);
   let toastText: string = $state("");
+  let counter = $state(6);
 
   let messages: Message[] = $state([]);
-  let consumers: Record<string, ConsumerType> =  $state({}) ;
-
   let clientId: string;
 
   let device: Device;
@@ -50,10 +48,10 @@
   let videoProducer: Producer;
   let audioProducer: Producer;
 
-  //let consumers: Record<string, ConsumerType> = {};
+  let consumers: Record<string, ConsumerType> = {};
 
-  let localStream: MediaStream | undefined = $state();
-  //let localMediaLeft: HTMLVideoElement;
+  let localStream: MediaStream;
+  let localMediaLeft: HTMLVideoElement;
 
   let remoteVideos: HTMLVideoElement[] = new Array<HTMLVideoElement>(5);
   let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
@@ -81,12 +79,20 @@
       socket,
       device,
       consumers,
+      remoteVideos
     );
   });
 
   function trigger(text: string) {
     toastStatus = true;
     toastText = text;
+    counter = 6;
+    timeout();
+  }
+
+  function timeout() {
+    if (--counter > 0) return setTimeout(timeout, 1000);
+    toastStatus = false;
   }
 
   async function updateRemoteVideos(newListOfActives: string[]) {
@@ -146,7 +152,9 @@
           consumeData,
           socket,
           device,
-          consumers);
+          consumers,
+          remoteVideos
+        );
 
         enableFeedBtn = false;
       } catch (error) {
@@ -185,8 +193,7 @@
 
   async function sendFeed() {
     if (localStream) {
-      //localMediaLeft.srcObject = localStream;
-      
+      localMediaLeft.srcObject = localStream;
 
       producerTransport = await createProducerTransport(socket, device);
       const producers = await createProducer(localStream, producerTransport);
@@ -326,8 +333,7 @@
         class="grid grid-cols-5 gap-4 overflow-x-auto"
         padding="none"
       >
-        <VideoPane stream={localStream!} userName={userName} videoClass="h-[9rem] aspect-video" />
-        <!-- <div class="m-2 truncate">
+        <div class="m-2 truncate">
           <video
             bind:this={localMediaLeft}
             class="h-[9rem] aspect-video"
@@ -336,17 +342,16 @@
             playsinline
           ></video>
           <div class="text-center">{userName}</div>
-        </div> -->
+        </div>
         <div class="m-2 truncate">
+          <!-- svelte-ignore a11y_media_has_caption -->
           <video
             bind:this={remoteVideos[1]}
             class="h-[9rem] aspect-video"
             autoplay
             playsinline
             controls
-          >
-          <track kind="captions"/>
-        </video>
+          ></video>
           <div
             bind:this={remoteUserNames[1]}
             class="username text-center"
