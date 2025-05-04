@@ -24,6 +24,7 @@
     UsersGroupOutline,
     VideoCameraOutline,
   } from "flowbite-svelte-icons";
+  import VideoPane from "$lib/VideoPane.svelte";
 
   type VideoStream = "camera" | "desktop";
 
@@ -41,6 +42,9 @@
   let counter = $state(6);
 
   let messages: Message[] = $state([]);
+  let localMediaLeft: HTMLVideoElement | undefined = $state(undefined);
+  let localStream: MediaStream;
+
   let clientId: string;
 
   let device: Device;
@@ -50,11 +54,10 @@
 
   let consumers: Record<string, ConsumerType> = {};
 
-  let localStream: MediaStream;
-  let localMediaLeft: HTMLVideoElement;
+  //let localMediaLeft: HTMLVideoElement;
 
   let remoteVideos: HTMLVideoElement[] = new Array<HTMLVideoElement>(5);
-  let remoteUserNames: HTMLDivElement[] = new Array<HTMLDivElement>(5);
+  let remoteUserNames: string[] = $state(new Array<string>(5));
 
   const socket = useSocket();
 
@@ -106,11 +109,10 @@
     newListOfActives.forEach((aid) => {
       if (aid !== audioProducer?.id) {
         const remoteVideo = remoteVideos[slot];
-        const remoteVideoUserName = remoteUserNames[slot];
         const consumerForThisSlot = consumers[aid];
 
         remoteVideo.srcObject = consumerForThisSlot?.combinedStream;
-        remoteVideoUserName.innerHTML = consumerForThisSlot?.userName;
+        remoteUserNames[slot] = consumerForThisSlot?.userName;
         slot++; //for the next
       }
     });
@@ -182,9 +184,8 @@
         };
         localStream =
           await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-
-        await sendFeed();
       }
+      await sendFeed();
     } catch (error) {
       trigger("خطا هنگام ارسال تصاویر ویدئویی!");
       console.log(error);
@@ -192,9 +193,8 @@
   }
 
   async function sendFeed() {
-    if (localStream) {
+    if (localStream && localMediaLeft) {
       localMediaLeft.srcObject = localStream;
-
       producerTransport = await createProducerTransport(socket, device);
       const producers = await createProducer(localStream, producerTransport);
       audioProducer = producers.audioProducer;
@@ -266,20 +266,18 @@
     <Card size="none" class="grid grid-rows-[1fr_12rem] gap-1" padding="none">
       <Card
         size="none"
-        class="p-1 grid grid-rows-[1fr_2rem_2rem] items-center"
+        class="p-1 grid grid-rows-[1fr_2rem] items-center"
         padding="none"
       >
-        <div class="mx-auto h-(--video--height)">
-          <!-- svelte-ignore a11y_media_has_caption -->
-          <video
-            bind:this={remoteVideos[0]}
-            class="h-full aspect-video"
-            autoplay
-            controls
-            playsinline
-          ></video>
-        </div>
-        <div bind:this={remoteUserNames[0]} class="text-center"></div>
+        <VideoPane
+          bind:videoRef={remoteVideos[0]}
+          userName={remoteUserNames[0]}
+          videoClass="h-full aspect-video"
+          divClass="mb-6 mx-auto h-(--video--height)"
+          autoplay
+          controls
+          playsinline
+        />
         <div class="grid justify-center">
           <div>
             <Button
@@ -333,72 +331,47 @@
         class="grid grid-cols-5 gap-4 overflow-x-auto"
         padding="none"
       >
-        <div class="m-2 truncate">
-          <video
-            bind:this={localMediaLeft}
-            class="h-[9rem] aspect-video"
-            muted
-            autoplay
-            playsinline
-          ></video>
-          <div class="text-center">{userName}</div>
-        </div>
-        <div class="m-2 truncate">
-          <!-- svelte-ignore a11y_media_has_caption -->
-          <video
-            bind:this={remoteVideos[1]}
-            class="h-[9rem] aspect-video"
-            autoplay
-            playsinline
-            controls
-          ></video>
-          <div
-            bind:this={remoteUserNames[1]}
-            class="username text-center"
-          ></div>
-        </div>
-        <div class="m-2 truncate">
-          <!-- svelte-ignore a11y_media_has_caption -->
-          <video
-            bind:this={remoteVideos[2]}
-            class="h-[9rem] aspect-video"
-            autoplay
-            playsinline
-            controls
-          ></video>
-          <div
-            bind:this={remoteUserNames[2]}
-            class="username text-center"
-          ></div>
-        </div>
-        <div class="m-2 truncate">
-          <!-- svelte-ignore a11y_media_has_caption -->
-          <video
-            bind:this={remoteVideos[3]}
-            class="h-[9rem] aspect-video"
-            autoplay
-            playsinline
-            controls
-          ></video>
-          <div
-            bind:this={remoteUserNames[3]}
-            class="username text-center"
-          ></div>
-        </div>
-        <div class="m-2 truncate">
-          <!-- svelte-ignore a11y_media_has_caption -->
-          <video
-            bind:this={remoteVideos[4]}
-            class="h-[9rem] aspect-video"
-            autoplay
-            playsinline
-            controls
-          ></video>
-          <div
-            bind:this={remoteUserNames[4]}
-            class="username text-center"
-          ></div>
-        </div>
+        <VideoPane
+          bind:videoRef={localMediaLeft!}
+          videoClass="h-[9rem] aspect-video"
+          {userName}
+          muted
+          autoplay
+          playsinline
+          controls
+        />
+        <VideoPane
+          bind:videoRef={remoteVideos[1]}
+          videoClass="h-[9rem] aspect-video"
+          userName={remoteUserNames[1]}
+          autoplay
+          playsinline
+          controls
+        />
+        <VideoPane
+          bind:videoRef={remoteVideos[2]}
+          videoClass="h-[9rem] aspect-video"
+          userName={remoteUserNames[2]}
+          autoplay
+          playsinline
+          controls
+        />
+        <VideoPane
+          bind:videoRef={remoteVideos[3]}
+          videoClass="h-[9rem] aspect-video"
+          userName={remoteUserNames[3]}
+          autoplay
+          playsinline
+          controls
+        />
+        <VideoPane
+          bind:videoRef={remoteVideos[4]}
+          videoClass="h-[9rem] aspect-video"
+          userName={remoteUserNames[4]}
+          autoplay
+          playsinline
+          controls
+        />
       </Card>
     </Card>
     <Card size="none" padding="none">
