@@ -16,8 +16,8 @@
   let {
     videoRef = $bindable(),
     userName,
-    videoClass = "h-[9rem] aspect-video",
-    divClass = "m-2 truncate",
+    videoClass = "h-[9rem]",
+    divClass = "m-2",
     muted = false,
     autoplay = false,
     playsinline = false,
@@ -25,8 +25,8 @@
     ...props
   }: VideoPaneProps = $props();
 
-  let vidClass = twMerge(videoClass);
-  let divcls = twMerge(divClass);
+  let vidClass = twMerge(["aspect-video mx-auto", videoClass]);
+  let divcls = twMerge(["truncate bg-gray-950 dark:bg-gray-100 text-gray-50 dark:text-gray-950", divClass]);
 </script>
 
 <div class={divcls}>
@@ -39,5 +39,5 @@
     {controls}
     {...props}
   ></video>
-  <div class="text-center">{userName}</div>
+  <div class="text-center text-gray-50 dark:text-gray-950">{userName}</div>
 </div>

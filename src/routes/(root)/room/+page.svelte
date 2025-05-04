@@ -74,16 +74,11 @@
     updateRemoteVideos(newListOfActives);
   });
 
-  socket.on("newProducersToConsume", (consumeData) => {
+  socket.on("newProducersToConsume", async (consumeData) => {
     // console.log("newProducersToConsume")
     // console.log(consumeData)
-    requestTransportToConsume(
-      consumeData,
-      socket,
-      device,
-      consumers,
-      remoteVideos
-    );
+    requestTransportToConsume(consumeData, socket, device, consumers);
+    await updateRemoteVideos(consumeData.audioPidsToCreate!);
   });
 
   function trigger(text: string) {
@@ -108,11 +103,10 @@
     let slot = 0;
     newListOfActives.forEach((aid) => {
       if (aid !== audioProducer?.id) {
-        const remoteVideo = remoteVideos[slot];
-        const consumerForThisSlot = consumers[aid];
+        const consumer = consumers[aid];
 
-        remoteVideo.srcObject = consumerForThisSlot?.combinedStream;
-        remoteUserNames[slot] = consumerForThisSlot?.userName;
+        remoteVideos[slot].srcObject = consumer?.combinedStream;
+        remoteUserNames[slot] = consumer?.userName;
         slot++; //for the next
       }
     });
@@ -150,13 +144,8 @@
 
         //console.log("consumeData:", consumeData);
 
-        requestTransportToConsume(
-          consumeData,
-          socket,
-          device,
-          consumers,
-          remoteVideos
-        );
+        requestTransportToConsume(consumeData, socket, device, consumers);
+        await updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
 
         enableFeedBtn = false;
       } catch (error) {
@@ -272,14 +261,14 @@
         <VideoPane
           bind:videoRef={remoteVideos[0]}
           userName={remoteUserNames[0]}
-          videoClass="h-full aspect-video"
+          videoClass="h-full"
           divClass="mb-6 mx-auto h-(--video--height)"
           autoplay
           controls
           playsinline
         />
-        <div class="grid justify-center">
-          <div>
+        <div class="grid justify-center py-2">
+          <div class="grid grid-cols-4 gap-2 items-center">
             <Button
               class="py-1 px-3"
               disabled={enableFeedBtn}
@@ -333,7 +322,8 @@
       >
         <VideoPane
           bind:videoRef={localMediaLeft!}
-          videoClass="h-[9rem] aspect-video"
+          videoClass="w-[16rem]"
+          divClass="p-2"
           {userName}
           muted
           autoplay
@@ -342,7 +332,8 @@
         />
         <VideoPane
           bind:videoRef={remoteVideos[1]}
-          videoClass="h-[9rem] aspect-video"
+          videoClass="w-[16rem]"
+          divClass="p-2"
           userName={remoteUserNames[1]}
           autoplay
           playsinline
@@ -350,7 +341,8 @@
         />
         <VideoPane
           bind:videoRef={remoteVideos[2]}
-          videoClass="h-[9rem] aspect-video"
+          videoClass="w-[16rem]"
+          divClass="p-2"
           userName={remoteUserNames[2]}
           autoplay
           playsinline
@@ -358,7 +350,8 @@
         />
         <VideoPane
           bind:videoRef={remoteVideos[3]}
-          videoClass="h-[9rem] aspect-video"
+          videoClass="w-[16rem]"
+          divClass="p-2"
           userName={remoteUserNames[3]}
           autoplay
           playsinline
@@ -366,7 +359,8 @@
         />
         <VideoPane
           bind:videoRef={remoteVideos[4]}
-          videoClass="h-[9rem] aspect-video"
+          videoClass="w-[16rem]"
+          divClass="p-2"
           userName={remoteUserNames[4]}
           autoplay
           playsinline
