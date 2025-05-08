@@ -1,12 +1,12 @@
-import { Socket } from "socket.io-client";
 import createConsumer from "./createConsumer";
 import createConsumerTransport from "./createConsumerTransport";
 import { Device } from "mediasoup-client";
 import type { ConsumeData, ConsumerType } from "./types";
+import type { SocketType } from "$lib/useSocket";
 
 const requestTransportToConsume = (
   consumeData: ConsumeData,
-  socket: Socket,
+  socket: SocketType,
   device: Device,
   consumers: Record<string,ConsumerType>,
   //remoteVideos: HTMLVideoElement[]
@@ -32,6 +32,10 @@ const requestTransportToConsume = (
       "requestTransport",
       { type: "consumer", audioPid }
     );
+
+    if(!consumerTransportParams)
+      throw new Error('consumerTransportParams undefined');
+
     //console.log("consumerTransportParams:", consumerTransportParams);
     const consumerTransport = createConsumerTransport(
       consumerTransportParams,

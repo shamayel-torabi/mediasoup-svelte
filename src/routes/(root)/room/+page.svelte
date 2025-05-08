@@ -45,6 +45,9 @@
   let localMediaLeft: HTMLVideoElement | undefined = $state(undefined);
   let localStream: MediaStream;
 
+  let remoteVideos: HTMLVideoElement[] = $state(new Array<HTMLVideoElement>(5));
+  let remoteUserNames: string[] = $state(new Array<string>(5));
+
   let clientId: string;
 
   let device: Device;
@@ -53,11 +56,6 @@
   let audioProducer: Producer;
 
   let consumers: Record<string, ConsumerType> = {};
-
-  //let localMediaLeft: HTMLVideoElement;
-
-  let remoteVideos: HTMLVideoElement[] = new Array<HTMLVideoElement>(5);
-  let remoteUserNames: string[] = $state(new Array<string>(5));
 
   const socket = useSocket();
 
@@ -77,8 +75,12 @@
   socket.on("newProducersToConsume", async (consumeData) => {
     // console.log("newProducersToConsume")
     // console.log(consumeData)
-    requestTransportToConsume(consumeData, socket, device, consumers);
-    await updateRemoteVideos(consumeData.audioPidsToCreate!);
+    try {
+      requestTransportToConsume(consumeData, socket, device, consumers);
+      await updateRemoteVideos(consumeData.audioPidsToCreate!);
+    } catch (error) {
+      console.error(error)
+    }
   });
 
   function trigger(text: string) {

@@ -1,10 +1,10 @@
+import type { SocketType } from "$lib/useSocket";
 import { Device, type TransportOptions } from "mediasoup-client/types";
-import { Socket } from "socket.io-client";
 
 const createConsumerTransport = (
   transportParams: TransportOptions,
   device: Device,
-  socket: Socket,
+  socket: SocketType,
   audioPid: string
 ) => {
   // make a downstream transport for ONE producer/peer/client (with audio and video producers)

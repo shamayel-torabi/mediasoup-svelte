@@ -1,11 +1,11 @@
+import type { SocketType } from "$lib/useSocket";
 import { Consumer, Device, Transport, type MediaKind } from "mediasoup-client/types";
-import { Socket } from "socket.io-client";
 
 const createConsumer = (
   consumerTransport: Transport,
   producerId: string,
   device: Device,
-  socket: Socket,
+  socket: SocketType,
   kind: MediaKind,
   slot?: number
 ) => {
@@ -28,7 +28,7 @@ const createConsumer = (
     } else {
       // we got valid params! Use them to consume
       const consumer = await consumerTransport.consume(
-        consumerParams.consumerOptions
+        consumerParams.consumerOptions!
       );
       //console.log("consume() has finished")
       // const { track } = consumer;

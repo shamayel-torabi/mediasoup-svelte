@@ -1,8 +1,8 @@
+import type { SocketType } from "$lib/useSocket";
 import { Device } from "mediasoup-client";
 import { Transport } from "mediasoup-client/types";
-import { Socket } from "socket.io-client";
 
-const createProducerTransport = (socket: Socket, device: Device) =>
+const createProducerTransport = (socket: SocketType, device: Device) =>
   new Promise<Transport>(async (resolve, _reject) => {
     // ask the server to make a transport and send params
     const producerTransportParams = await socket.emitWithAck(
