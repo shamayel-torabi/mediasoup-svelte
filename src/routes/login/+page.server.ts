@@ -48,3 +48,6 @@ export const actions = {
     return fail(400, { email, emailMissing, passwordMissing, incorrect });
   },
 } satisfies Actions;
+
+
+export const prerender = true;
