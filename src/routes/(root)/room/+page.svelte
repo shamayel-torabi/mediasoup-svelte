@@ -76,8 +76,8 @@
     // console.log("newProducersToConsume")
     // console.log(consumeData)
     try {
-      requestTransportToConsume(consumeData, socket, device, consumers);
-      updateRemoteVideos(consumeData.audioPidsToCreate!);
+      requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+      //updateRemoteVideos(consumeData.audioPidsToCreate!);
     } catch (error) {
       console.error(error)
     }
@@ -145,10 +145,8 @@
           associatedUserNames: joinRoomResp.result?.associatedUserNames!,
         };
 
-        console.log("consumeData:", consumeData);
-
-        requestTransportToConsume(consumeData, socket, device, consumers);
-        updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
+        requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+        //updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
 
         enableFeedBtn = false;
       } catch (error) {
@@ -266,9 +264,6 @@
           userName={remoteUserNames[0]}
           videoClass="h-full"
           divClass="mb-6 mx-auto h-(--video--height)"
-          autoplay
-          controls
-          playsinline
         />
         <div class="grid justify-center py-2">
           <div class="grid grid-cols-4 gap-2 items-center">
@@ -329,45 +324,30 @@
           divClass="p-2"
           {userName}
           muted
-          autoplay
-          playsinline
-          controls
         />
         <VideoPane
           bind:videoRef={remoteVideos[1]}
           videoClass="w-[16rem]"
           divClass="p-2"
           userName={remoteUserNames[1]}
-          autoplay
-          playsinline
-          controls
         />
         <VideoPane
           bind:videoRef={remoteVideos[2]}
           videoClass="w-[16rem]"
           divClass="p-2"
           userName={remoteUserNames[2]}
-          autoplay
-          playsinline
-          controls
         />
         <VideoPane
           bind:videoRef={remoteVideos[3]}
           videoClass="w-[16rem]"
           divClass="p-2"
           userName={remoteUserNames[3]}
-          autoplay
-          playsinline
-          controls
         />
         <VideoPane
           bind:videoRef={remoteVideos[4]}
           videoClass="w-[16rem]"
           divClass="p-2"
           userName={remoteUserNames[4]}
-          autoplay
-          playsinline
-          controls
         />
       </Card>
     </Card>

@@ -19,9 +19,9 @@
     videoClass = "h-[9rem]",
     divClass = "m-2",
     muted = false,
-    autoplay = false,
-    playsinline = false,
-    controls = false,
+    autoplay = true,
+    playsinline = true,
+    controls = true,
     ...props
   }: VideoPaneProps = $props();
 

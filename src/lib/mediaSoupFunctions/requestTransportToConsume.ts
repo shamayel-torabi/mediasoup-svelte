@@ -8,8 +8,9 @@ const requestTransportToConsume = (
   consumeData: ConsumeData,
   socket: SocketType,
   device: Device,
-  consumers: Record<string,ConsumerType>,
-  //remoteVideos: HTMLVideoElement[]
+  consumers: Record<string, ConsumerType>,
+  remoteVideos: HTMLVideoElement[],
+  remoteUserNames: string[]
 ) => {
   //how many transports? One for each consumer?
   // Or one that handles all consumers?
@@ -25,6 +26,9 @@ const requestTransportToConsume = (
   // This means every peer has an upstream transport and a
   // downstream one, so the server will have 2n transports open,
   // where n is the number of peers
+
+  console.log("consumeData:", consumeData);
+
   consumeData.audioPidsToCreate.forEach(async (audioPid, i) => {
     const videoPid = consumeData.videoPidsToCreate[i];
     // expecting back transport params for THIS audioPid. Maybe 5 times, maybe 0
@@ -33,8 +37,8 @@ const requestTransportToConsume = (
       { type: "consumer", audioPid }
     );
 
-    if(!consumerTransportParams)
-      throw new Error('consumerTransportParams undefined');
+    if (!consumerTransportParams)
+      throw new Error("consumerTransportParams undefined");
 
     //console.log("consumerTransportParams:", consumerTransportParams);
     const consumerTransport = createConsumerTransport(
@@ -54,9 +58,12 @@ const requestTransportToConsume = (
         audioConsumer?.track,
         videoConsumer?.track,
       ]);
-      // if (remoteVideos[i])
-      //   remoteVideos[i].srcObject = combinedStream;
       
+      if (remoteVideos[i]) {
+        remoteVideos[i].srcObject = combinedStream;
+        remoteUserNames[i] = consumeData.associatedUserNames[i];
+      }
+
       console.log("Hope this works...");
       consumers[audioPid] = {
         combinedStream,
@@ -67,7 +74,7 @@ const requestTransportToConsume = (
       };
     } catch (error) {
       console.log(error);
-      throw new Error('requestTransportToConsume error')
+      throw new Error("requestTransportToConsume error");
     }
   });
 };
