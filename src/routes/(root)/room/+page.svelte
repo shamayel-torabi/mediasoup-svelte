@@ -69,7 +69,7 @@
   });
 
   socket.on("updateActiveSpeakers", async (newListOfActives: string[]) => {
-    await updateRemoteVideos(newListOfActives);
+    updateRemoteVideos(newListOfActives);
   });
 
   socket.on("newProducersToConsume", async (consumeData) => {
@@ -77,13 +77,13 @@
     // console.log(consumeData)
     try {
       requestTransportToConsume(consumeData, socket, device, consumers);
-      await updateRemoteVideos(consumeData.audioPidsToCreate!);
+      updateRemoteVideos(consumeData.audioPidsToCreate!);
     } catch (error) {
       console.error(error)
     }
   });
 
-  async function updateRemoteVideos(newListOfActives: string[]) {
+  function updateRemoteVideos(newListOfActives: string[]) {
     //console.log("updateActiveSpeakers:", newListOfActives);
 
     for (let el of remoteVideos) {
@@ -145,10 +145,10 @@
           associatedUserNames: joinRoomResp.result?.associatedUserNames!,
         };
 
-        //console.log("consumeData:", consumeData);
+        console.log("consumeData:", consumeData);
 
         requestTransportToConsume(consumeData, socket, device, consumers);
-        await updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
+        updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
 
         enableFeedBtn = false;
       } catch (error) {
