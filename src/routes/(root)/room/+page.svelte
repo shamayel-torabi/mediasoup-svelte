@@ -69,7 +69,7 @@
   });
 
   socket.on("updateActiveSpeakers", async (newListOfActives: string[]) => {
-    updateRemoteVideos(newListOfActives);
+    await updateRemoteVideos(newListOfActives);
   });
 
   socket.on("newProducersToConsume", async (consumeData) => {
@@ -82,18 +82,6 @@
       console.error(error)
     }
   });
-
-  function trigger(text: string) {
-    toastStatus = true;
-    toastText = text;
-    counter = 6;
-    timeout();
-  }
-
-  function timeout() {
-    if (--counter > 0) return setTimeout(timeout, 1000);
-    toastStatus = false;
-  }
 
   async function updateRemoteVideos(newListOfActives: string[]) {
     //console.log("updateActiveSpeakers:", newListOfActives);
@@ -113,7 +101,20 @@
       }
     });
   }
+  
+  function trigger(text: string) {
+    toastStatus = true;
+    toastText = text;
+    counter = 6;
+    timeout();
+  }
 
+  function timeout() {
+    if (--counter > 0) return setTimeout(timeout, 1000);
+    toastStatus = false;
+  }
+
+  
   async function joinRoom() {
     //console.log("joinRoom");
     const { roomId } = data;
