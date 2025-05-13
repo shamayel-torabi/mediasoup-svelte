@@ -76,7 +76,7 @@
     // console.log("newProducersToConsume")
     // console.log(consumeData)
     try {
-      requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+      requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos, remoteUserNames);
       //updateRemoteVideos(consumeData.audioPidsToCreate!);
     } catch (error) {
       console.error(error)
@@ -113,7 +113,6 @@
     if (--counter > 0) return setTimeout(timeout, 1000);
     toastStatus = false;
   }
-
   
   async function joinRoom() {
     //console.log("joinRoom");
@@ -145,7 +144,7 @@
           associatedUserNames: joinRoomResp.result?.associatedUserNames!,
         };
 
-        requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos);
+        requestTransportToConsume(consumeData, socket, device, consumers, remoteVideos, remoteUserNames);
         //updateRemoteVideos(joinRoomResp.result?.audioPidsToCreate!);
 
         enableFeedBtn = false;

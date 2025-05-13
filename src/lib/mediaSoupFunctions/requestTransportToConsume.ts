@@ -30,25 +30,25 @@ const requestTransportToConsume = (
   console.log("consumeData:", consumeData);
 
   consumeData.audioPidsToCreate.forEach(async (audioPid, i) => {
-    const videoPid = consumeData.videoPidsToCreate[i];
-    // expecting back transport params for THIS audioPid. Maybe 5 times, maybe 0
-    const consumerTransportParams = await socket.emitWithAck(
-      "requestTransport",
-      { type: "consumer", audioPid }
-    );
-
-    if (!consumerTransportParams)
-      throw new Error("consumerTransportParams undefined");
-
-    //console.log("consumerTransportParams:", consumerTransportParams);
-    const consumerTransport = createConsumerTransport(
-      consumerTransportParams,
-      device,
-      socket,
-      audioPid
-    );
-
     try {
+      const videoPid = consumeData.videoPidsToCreate[i];
+      // expecting back transport params for THIS audioPid. Maybe 5 times, maybe 0
+      const consumerTransportParams = await socket.emitWithAck(
+        "requestTransport",
+        { type: "consumer", audioPid }
+      );
+
+      if (!consumerTransportParams)
+        throw new Error("consumerTransportParams undefined");
+
+      //console.log("consumerTransportParams:", consumerTransportParams);
+      const consumerTransport = createConsumerTransport(
+        consumerTransportParams,
+        device,
+        socket,
+        audioPid
+      );
+
       const [audioConsumer, videoConsumer] = await Promise.all([
         createConsumer(consumerTransport, audioPid, device, socket, "audio", i),
         createConsumer(consumerTransport, videoPid, device, socket, "video", i),
@@ -58,10 +58,10 @@ const requestTransportToConsume = (
         audioConsumer?.track,
         videoConsumer?.track,
       ]);
-      
+
       if (remoteVideos[i]) {
         remoteVideos[i].srcObject = combinedStream;
-        remoteUserNames[i] = consumeData.associatedUserNames[i];
+        remoteUserNames[i] = consumeData?.associatedUserNames[i];
       }
 
       console.log("Hope this works...");
@@ -74,7 +74,7 @@ const requestTransportToConsume = (
       };
     } catch (error) {
       console.log(error);
-      throw new Error("requestTransportToConsume error");
+      //throw new Error("requestTransportToConsume error");
     }
   });
 };
