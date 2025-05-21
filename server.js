@@ -1,21 +1,24 @@
 import express from "express";
 import cors from "cors";
-import { createServer } from "vite";
-import runMediaSoupServer from './src/lib/server/mediaServer.js'
+import { runMediaSoupServer } from "./socket-server/mediaServer.js";
 
 // Constants
 const isDevelopment = process.env.NODE_ENV === "development";
-const port = process.env.PORT || 5173;
+const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || "localhost";
 
 // Create http server
 const app = express();
 
 if (isDevelopment) {
-  const vite = await createServer({
-    server: { middlewareMode: true },
-    appType: "custom",
-  });
-  app.use(vite.middlewares);
+  const viteDevServer = await import("vite").then((vite) =>
+    vite.createServer({
+      server: { middlewareMode: true },
+      appType: "custom",
+    })
+  );
+
+  app.use(viteDevServer.middlewares);
 } else {
   const compression = (await import("compression")).default;
   const handler = (await import("./build/handler.js")).handler;
@@ -29,4 +32,8 @@ if (isDevelopment) {
   app.use(handler);
 }
 
-runMediaSoupServer(app)
+const httpServer = await runMediaSoupServer(app);
+
+httpServer.listen(PORT, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
+});

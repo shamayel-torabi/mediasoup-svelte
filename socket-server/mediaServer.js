@@ -8,15 +8,13 @@ import { Room } from "./Room.js";
 import { Client } from "./Client.js";
 import { config } from "./config.js";
 
-const PORT = config.port;
-const HOST = process.env.HOST || "localhost";
 const UUIDV5_NAMESPACE = "af6f650e-3ced-4f80-afef-f956afe3191d";
 
 //our globals
 let workers = [];
 const rooms = new Map();
 
-const runMediaSoupServer = async (app) => {
+export const runMediaSoupServer = async (app) => {
     workers = await createWorkers();
     const httpServer = createServer(app);
     // const socketio = new Server<ServerToClientEvents, ClientToServerEvents>(
@@ -285,8 +283,6 @@ const runMediaSoupServer = async (app) => {
             }
         });
     });
-    httpServer.listen(PORT, () => {
-        console.log(`Server is running on http://${HOST}:${PORT}`);
-    });
+
+    return httpServer;
 };
-export default runMediaSoupServer;

@@ -3,12 +3,11 @@ const HOST = process.env.HOST || "localhost";
 //console.log('HOST=', HOST)
 
 const config = {
-    port: Number.parseInt(process.env.PORT) || 3000,
     workerSettings: {
         //rtcMinPort and max are just arbitray ports for our traffic
         //useful for firewall or networking rules
         rtcMinPort: 40000,
-        rtcMaxPort: 41000,
+        rtcMaxPort: 40100,
         //log levels you want to set
         logLevel: "warn",
         logTags: ["info", "ice", "dtls", "rtp", "srtp", "rtcp"],
