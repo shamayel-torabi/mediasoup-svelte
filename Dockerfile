@@ -22,11 +22,11 @@ FROM node:22-slim AS production
 RUN apt update && apt install libssl-dev -y --no-install-recommends
 
 FROM production
-COPY ./package.json package-lock.json server.js /app/
+COPY ./package.json package-lock.json /app/
 COPY ./server.prod.js /app/server.js
+COPY ./socket-server /app/socket-server
 COPY --from=production-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
-COPY ./socket-server /app/socket-server
 WORKDIR /app
 EXPOSE 3000
 CMD ["npm", "run", "start"]
