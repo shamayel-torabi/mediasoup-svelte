@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { runMediaSoupServer } from "./socket-server/mediaServer.js";
 
 // Constants
 const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || "localhost";
+const BUILD_PATH_SOCKET = "./build/server/socket/index.js";
 
 // Create http server
 const app = express();
@@ -20,7 +20,7 @@ app.get("/healthcheck", (req, res) => {
 });
 app.use(handler);
 
-const httpServer = await runMediaSoupServer(app);
+const httpServer = await import(BUILD_PATH_SOCKET).then((mod) => mod.createSocketServer(app));
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on http://${HOST}:${PORT}`);

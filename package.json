@@ -5,8 +5,10 @@
 	"type": "module",
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development node server.js",
-		"build": "vite build",
-		"start": "node server.js",
+		"build:server": "vite build",
+		"build:socket": "tsc --project tsconfig.socket.json && ts-add-js-extension --dir=build/server/socket",
+		"build": "npm run build:server && npm run build:socket",
+		"start": "node server.prod.js",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
@@ -27,6 +29,7 @@
 		"svelte": "^5.25.0",
 		"svelte-check": "^4.0.0",
 		"tailwindcss": "^4.1.4",
+		"ts-add-js-extension": "^1.6.6",
 		"typescript": "^5.0.0",
 		"vite": "^6.2.6"
 	},

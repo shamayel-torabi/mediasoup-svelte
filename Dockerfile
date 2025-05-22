@@ -18,13 +18,12 @@ COPY . /app
 WORKDIR /app
 RUN npm run build
 
-FROM node:22-slim AS production
-RUN apt update && apt install libssl-dev -y --no-install-recommends
+# FROM node:22-slim AS production
+# RUN apt update && apt install libssl-dev -y --no-install-recommends
 
-FROM production
+FROM node:22-slim
 COPY ./package.json package-lock.json /app/
 COPY ./server.prod.js /app/server.js
-COPY ./socket-server /app/socket-server
 COPY --from=production-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 WORKDIR /app
